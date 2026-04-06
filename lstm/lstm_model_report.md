@@ -1,4 +1,4 @@
-# Siamese Model Report
+# LSTM Model Report
 
 This report summarizes the saved outputs from:
 
@@ -29,7 +29,7 @@ The first notebook implemented a basic LSTM regressor:
   - `resume_vec * job_vec`
 - MLP regression head
 
-This model keeps the core Siamese idea: both texts are passed through the same encoder so that resume and job description are embedded into the same learned semantic space.
+This model keeps the core shared-encoder idea: both texts are passed through the same encoder so that resume and job description are embedded into the same learned semantic space.
 
 ### Result
 
@@ -47,7 +47,7 @@ Relative to earlier baselines, this was:
 
 ### High-Level Interpretation
 
-At a conceptual level, the plain Siamese LSTM likely underperformed because it was too simple for this task.
+At a conceptual level, the plain LSTM likely underperformed because it was too simple for this task.
 
 First, it used only the **final hidden state** of a one-direction LSTM as the summary of an entire resume or job description. In NLP terms, this means the model compresses a long sequence into one vector by relying heavily on the last part of the recurrent state. That can work for short sequences, but resumes are long, noisy, and contain many scattered signals such as skills, positions, technologies, education, and domain terms. Important information may appear anywhere in the sequence, not just near the end. A single final state is therefore a weak bottleneck.
 
@@ -55,9 +55,9 @@ Second, the baseline LSTM treated the problem mostly as **semantic encoding**, b
 
 Third, the model depended mostly on word embeddings and recurrent composition, but your dataset already showed that **structured features matter**. The plain LSTM ignored useful side information such as counts of skills, degrees, positions, experience years, and overlap-based features. In other words, it threw away signals that earlier baselines had already shown to be predictive.
 
-So the main lesson from the first notebook is not that Siamese models are bad, but that a minimal LSTM encoder was not expressive enough for this resume-job matching problem.
+So the main lesson from the first notebook is not that shared-encoder models are bad, but that a minimal LSTM encoder was not expressive enough for this resume-job matching problem.
 
-## 2. Hybrid Siamese BiLSTM
+## 2. Hybrid BiLSTM
 
 ### Architecture Upgrades
 
@@ -87,7 +87,7 @@ This made it the strongest model in the project so far, outperforming:
 - combined text TF-IDF (`R² = 0.4938`)
 - separate resume/job TF-IDF (`R² = 0.4792`)
 - hybrid TF-IDF + structured regression (`R² = 0.5256`)
-- plain Siamese LSTM (`R² = 0.2910`)
+- plain LSTM (`R² = 0.2910`)
 
 ## 3. Why The Upgraded Model Worked Better
 
@@ -123,7 +123,7 @@ Together, these pooling methods reduce the compression problem of the basic LSTM
 
 ### The Model Became More About Matching, Not Just Encoding
 
-The improved model still uses the Siamese framework, but it strengthens the **matching** part of the architecture.
+The improved model still uses the shared-encoder framework, but it strengthens the **matching** part of the architecture.
 
 The plain LSTM mainly produced two embeddings and compared them. The upgraded model adds:
 
@@ -178,7 +178,7 @@ These are not the main conceptual reason for the gain, but they likely helped th
 
 ## 4. Why These Upgrades Were Chosen
 
-These changes were not arbitrary. They were chosen because they directly address the weaknesses of the plain Siamese LSTM.
+These changes were not arbitrary. They were chosen because they directly address the weaknesses of the plain LSTM.
 
 The plain model had three main limitations:
 
@@ -200,21 +200,21 @@ In other words, the upgraded model is better because it is better aligned with w
 | Model | R² | MSE |
 |---|---:|---:|
 | Structured only | 0.0939 | 0.0251 |
-| Plain Siamese LSTM | 0.2910 | 0.0196 |
+| Plain LSTM | 0.2910 | 0.0196 |
 | Separate TF-IDF | 0.4792 | 0.0144 |
 | Combined text TF-IDF | 0.4938 | 0.0140 |
 | Hybrid TF-IDF + structured | 0.5256 | 0.0131 |
-| Hybrid Siamese BiLSTM | 0.6679 | 0.0092 |
+| Hybrid BiLSTM | 0.6679 | 0.0092 |
 
-The upgraded model improved over the plain Siamese LSTM by about `0.3769` R² points and over the best earlier regression baseline by about `0.1423` R² points.
+The upgraded model improved over the plain LSTM by about `0.3769` R² points and over the best earlier regression baseline by about `0.1423` R² points.
 
 ## 6. Conclusion
 
 The experiments show a clear NLP lesson.
 
-A basic Siamese LSTM is an understandable starting point for text-pair regression, but for long, noisy, domain-specific text like resumes and job descriptions, it is too limited when it relies on only a final hidden state.
+A basic LSTM is an understandable starting point for text-pair regression, but for long, noisy, domain-specific text like resumes and job descriptions, it is too limited when it relies on only a final hidden state.
 
-The upgraded hybrid Siamese BiLSTM worked much better because it:
+The upgraded Hybrid BiLSTM worked much better because it:
 
 - encoded words with richer bidirectional context
 - summarized the whole sequence instead of only its endpoint
