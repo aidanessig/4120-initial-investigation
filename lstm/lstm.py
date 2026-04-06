@@ -235,7 +235,7 @@ class PooledBiLSTMEncoder(nn.Module):
         return torch.cat([mean_pool, max_pool], dim=1)
 
 
-class SiameseLSTMRegressor(nn.Module):
+class LSTMRegressor(nn.Module):
     def __init__(
         self,
         vocab_size: int,
@@ -287,7 +287,7 @@ class SiameseLSTMRegressor(nn.Module):
         return self.regressor(features).squeeze(1)
 
 
-class HybridSiameseBiLSTMRegressor(nn.Module):
+class HybridBiLSTMRegressor(nn.Module):
     def __init__(
         self,
         vocab_size: int,
